@@ -6,7 +6,7 @@
 open FSharp.Data
 
 //
-// JSON Provider
+// Querying StackOverflow with JSON Provider
 //
 type Questions = JsonProvider<"""https://api.stackexchange.com/2.2/questions?site=stackoverflow""">
 
@@ -16,19 +16,62 @@ type Questions = JsonProvider<"""https://api.stackexchange.com/2.2/questions?sit
 let csQuestions = """https://api.stackexchange.com/2.2/questions?site=stackoverflow&tagged=C%23"""
 Questions.Load(csQuestions).Items |> Seq.iter (fun q -> printfn "%s" q.Title)
 
-// Infers int and string
+//
+// We can create a domain-specific language (DSL) to facilitate querying with parameters
+//
+let questionQuery = """https://api.stackexchange.com/2.2/questions?site=stackoverflow"""
+
+let tagged tags query =
+    let joinedTags = tags |> String.concat ";"
+    sprintf "%s&tagged=%s" query joinedTags
+
+let page p query = sprintf "%s&page=%i" query p
+let pageSize s query = sprintf "%s&pagesize=%i" query s
+let extractQuestions (query:string) = Questions.Load(query).Items
+
+let ``C#`` = "C%23"
+let ``F#`` = "F%23"
+
+// List C# questions
+let cs =
+    questionQuery
+    |> tagged [``C#``]
+    |> pageSize 50
+    |> extractQuestions
+    |> Seq.iter (fun q -> printfn "%s" q.Title)
+
+// List F# questions
+let fs =
+    questionQuery
+    |> tagged [``F#``]
+    |> pageSize 50
+    |> extractQuestions
+    |> Seq.iter (fun q -> printfn "%s" q.Title)
+
+// List C# and F# questions
+let combined =
+    questionQuery
+    |> tagged [``C#``; ``F#``]
+    |> pageSize 50
+    |> extractQuestions
+    |> Seq.iter (fun q -> printfn "%s" q.Title)
+
+//
+// Type inference from JsonProvider "shape"
+//
+// Infer int and string
 type Simple = JsonProvider<""" { "name":"John", "age":94 } """>
 let simple = Simple.Parse(""" { "name":"Tomas", "age":4 } """)
 printfn "Age = %i" simple.Age
 printfn "Name = %s" simple.Name
 
-// Infers decimal
+// Infer decimal
 type Numbers = JsonProvider<""" [1, 2, 3, 3.14] """>
 let nums = Numbers.Parse(""" [1.2, 45.1, 98.2, 5] """)
 let total = nums |> Seq.sum
 printfn "Total = %M" total
 
-// Infers int and string
+// Infer int and string
 type Mixed = JsonProvider<""" [1, 2, "hello", "world"] """>
 let mixed = Mixed.Parse(""" [4, 5, "hello", "world" ] """)
 
