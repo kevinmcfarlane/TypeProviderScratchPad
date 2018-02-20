@@ -57,6 +57,8 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="images\daily_rentals.png" />
+    <None Include="images\moving_average_rentals.png" />
     <None Include="Script1.fsx" />
     <Content Include="packages.config" />
     <None Include="data\day.csv" />
