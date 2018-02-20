@@ -123,5 +123,44 @@ data.Countries.``United Kingdom``
 |> Chart.WithYAxis(Title = "Metric Tons")
 |> Chart.WithTitle(Text = "UK CO2 emissions (metric tons per capita)", InsideArea = false)
 
+//
+// Data Explioration - prelude to machine learning
+//
+// Bicycle rentals
+// - data from
+// UCI Machine Learning Repository: Bike Sharing Dataset Data Set
+// https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset
+type Data = CsvProvider<"data/day.csv">
+let dataset = Data.Load("data/day.csv")
+let data1 = dataset.Rows
 
+// Plot of day-by-day bicycle usage over time since the first observation
+let all = Chart.Line [ for obs in data1 -> obs.Cnt ] // cnt: count of total rental bikes including both casual and registered
 
+// Calculate some bicycle usage stats
+let count = data1 |> Seq.map (fun x -> float x.Cnt)
+let avg = count |> Seq.average
+let min = count |> Seq.min
+let max = count |> Seq.max
+
+// Create a list of windows of three observations
+// This chunks the series 1 .. 10 into blocks of three consecutive values: [[|1; 2; 3|]; [|2; 3; 4|];
+// [|3; 4; 5|]; [|4; 5; 6|]; [|5; 6; 7|]; [|6; 7; 8|]; [|7; 8; 9|]; [|8; 9; 10|]]
+let windowedExample =
+    [ 1 .. 10 ]
+    |> Seq.windowed 3
+    |> Seq.toList
+
+// Moving average with window size n
+let movingAverage n (series:float seq) = 
+    series 
+    |> Seq.windowed n
+    |> Seq.map (fun xs -> xs |> Seq.average)
+    |> Seq.toList
+
+// Plot original series overlaid with the moving averages over seven days and thirty days
+// (The moving averages do hint at a longer trend, and clearly show a certain regularity in the fluctuations over the year, including seasonal spikes.)
+Chart.Combine [
+    Chart.Line count
+    Chart.Line (movingAverage 7 count)
+    Chart.Line (movingAverage 30 count) ]
