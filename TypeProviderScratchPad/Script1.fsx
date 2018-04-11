@@ -1,6 +1,6 @@
 ﻿
 #I @"..\packages\"
-#r @"FSharp.Data.2.3.1\lib\net40\FSharp.Data.dll"
+#r @"FSharp.Data.2.4.6\lib\net45\FSharp.Data.dll"
 #load "../packages/FSharp.Charting.0.90.14/FSharp.Charting.fsx"
 
 open FSharp.Data
@@ -124,7 +124,7 @@ data.Countries.``United Kingdom``
 |> Chart.WithTitle(Text = "UK CO2 emissions (metric tons per capita)", InsideArea = false)
 
 //
-// Data Explioration - prelude to machine learning
+// Data Exploration - prelude to machine learning
 //
 // Bicycle rentals
 // - data from
